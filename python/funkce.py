@@ -1017,8 +1017,8 @@ def get_observables(coh_matrices, options, structure):
 #         ]}
 #     ]}
 def general_func(structure_defining_func=None, options_defining_func=None):
-    options = options_defining_func(None)
-    structure = structure_defining_func(None)
+    options = options_defining_func(0)
+    structure = structure_defining_func(0)
 
     def options_func(dep_options):
         print('timer: tick', flush=True)
@@ -1054,24 +1054,20 @@ def general_func(structure_defining_func=None, options_defining_func=None):
     points = np.linspace(options['divisions_start'], options['divisions_end'], options['divisions'])
     dependence_points = []
     for x in points:
-        if options['dependence']['name'] == 'structure':
-            dependence_points.append(structure_defining_func(x))
-        else:
+        if options['dependence']['name'] == 'wavelength' or options['dependence']['name'] == 'angle':
             dependence_points.append(options_defining_func(x))
+        else:
+            dependence_points.append(structure_defining_func(x))
 
-    print('timer: tick', flush=True)
     # Do not calculate here, if the dependence is not structural parameter...
     if options['dependence']['name'] == 'wavelength' or options['dependence']['name'] == 'angle':
         coherent_subsystems = get_coherent_subsets(structure)
         for item in coherent_subsystems:
             item['toeplitz_matrix'] = calculate_toeplitz_matrices(item, options)
-
-    if options['dependence']['name'] == 'structure':
-        values = np.array(list(map(structure_func, dependence_points)))
+        return get_coeffs(np.array(list(map(options_func, dependence_points))))
     else:
-        values = np.array(list(map(options_func, dependence_points)))
+        return get_coeffs(np.array(list(map(structure_func, dependence_points))))
 
-    return get_coeffs(values)
 
 
 def options_defining_func(options):

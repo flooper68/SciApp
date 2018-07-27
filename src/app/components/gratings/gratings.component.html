@@ -1,0 +1,179 @@
+<mat-tab-group #matTab>
+    <mat-tab label="Settings">
+        <form [formGroup]="gratingsForm">
+            <div class="content">
+
+                <mat-card>
+                    <mat-card-title>Structure parameters</mat-card-title>
+                    <mat-divider></mat-divider>
+                    <mat-card-content>
+                        <div>
+                            <mat-form-field>
+                                <input formControlName="cappingIndex" matInput
+                                       placeholder="Refractive index - Capping layer" value="1.5">
+                            </mat-form-field>
+                        </div>
+
+                        <div>
+                            <mat-form-field>
+                                <input formControlName="cappingThickness" matInput
+                                       placeholder="Thickness - Capping layer"
+                                       value="0">
+                            </mat-form-field>
+                            <span>[nm]</span>
+                        </div>
+
+                        <mat-checkbox formControlName="cappingIncoherent">Incoherent propagation</mat-checkbox>
+
+
+                        <div>
+                            <mat-form-field>
+                                <input formControlName="reflectiveIndex" matInput
+                                       placeholder="Refractive index - Reflective layer" value="1-6j">
+                            </mat-form-field>
+                        </div>
+                        <div>
+                            <mat-form-field>
+                                <input formControlName="reflectiveThickness" matInput
+                                       placeholder="Thickness - Reflective layer)" value="20">
+                            </mat-form-field>
+                            <span>[nm]</span>
+                        </div>
+                        <div>
+                            <mat-form-field>
+                                <input formControlName="gratingIndex" matInput placeholder="Refractive index - Grating"
+                                       value="1.5">
+                            </mat-form-field>
+                        </div>
+                        <div>
+                            <mat-form-field>
+                                <input formControlName="gratingThickness" matInput placeholder="Thickness - Grating"
+                                       value="100">
+                            </mat-form-field>
+                            <span>[nm]</span>
+                        </div>
+                        <div>
+                            <mat-form-field>
+                                <input formControlName="gratingPeriod" matInput placeholder="Period" value="1000">
+                            </mat-form-field>
+                            <span>[nm]</span>
+                        </div>
+                        <div>
+                            <mat-form-field>
+                                <input formControlName="gratingFill" matInput placeholder="Fill factor" value="0.5">
+                            </mat-form-field>
+                        </div>
+
+                    </mat-card-content>
+
+
+                </mat-card>
+
+
+                <img src="./../../src/assets/images/grating.png">
+                <mat-card>
+                    <mat-card-title>Calculation options</mat-card-title>
+                    <mat-divider></mat-divider>
+                    <mat-card-content class="right-card">
+                        <div>
+                            <mat-form-field class="small-input">
+                                <input formControlName="wavelength" matInput placeholder="Wavelength" value="833">
+                            </mat-form-field>
+                            <span>[nm]</span>
+                        </div>
+                        <div>
+                            <mat-form-field class="small-input">
+                                <input formControlName="angle" matInput placeholder="Incidence angle" value="0">
+                            </mat-form-field>
+                            <span>[Deg]</span>
+                        </div>
+
+                        <mat-form-field class="big-input">
+                            <mat-select formControlName="dependence" placeholder="Parameter dependence">
+                                <mat-option *ngFor="let item of calcOptions" [value]="item.value">
+                                    {{item.text}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <div class="center-col">
+                            <div class="center-row">
+                                <mat-form-field class="small-input">
+                                    <input formControlName="from" matInput placeholder="From" value="400">
+                                </mat-form-field>
+                                <mat-form-field class="small-input">
+                                    <input formControlName="to" matInput placeholder="To" value="800">
+                                </mat-form-field>
+                            </div>
+
+                            <mat-form-field class="small-input">
+                                <input formControlName="divisions" matInput placeholder="#Divisions" value="200">
+                            </mat-form-field>
+                        </div>
+
+                    </mat-card-content>
+                    <mat-divider></mat-divider>
+                    <mat-card-actions>
+                        <button mat-button="primary" (click)="calculate()" [disabled]="(progress | async) !== 0">
+                            Calculate
+                        </button>
+                        <button mat-button="primary" (click)="stopCalculation()" [disabled]="(progress | async) == 0 ">
+                            Stop
+                        </button>
+                    </mat-card-actions>
+
+
+                </mat-card>
+
+            </div>
+        </form>
+        <mat-progress-bar color="warn" mode="determinate" [value]="progress | async"></mat-progress-bar>
+
+    </mat-tab>
+    <mat-tab label="Plots" #tabPlots>
+        <div class="content-plots">
+
+            <mat-card class="plot-list mat-elevation-z7">
+                <mat-card-title style="padding: 25px; padding-bottom: 10px">
+                    Projects in DB
+                </mat-card-title>
+                <mat-divider></mat-divider>
+                <mat-nav-list *ngFor="let item of (gratingData|async)">
+                    <mat-list-item (click)="projectSelected(item)">{{item.name}}</mat-list-item>
+                </mat-nav-list>
+            </mat-card>
+            <div class="plot-content">
+                <mat-card class="settings-card">
+                    <mat-toolbar>
+                        <button mat-button (click)="saveProjectToDb()">Save project to DB</button>
+                        <button mat-button (click)="deleteProjectFromDb()">Delete project from DB</button>
+                        <button mat-button (click)="saveProjectToFile()">Export project</button>
+                        <button mat-button (click)="loadProject()">Load project</button>
+                    </mat-toolbar>
+                    <mat-divider></mat-divider>
+                    <div class="project-settings">
+                        <form [formGroup]="calculationInfoForm">
+                            <mat-form-field>
+                                <input formControlName="name" matInput placeholder="Project name" value="">
+                            </mat-form-field>
+
+                            <mat-checkbox style="margin-left: 50px" [disabled]="true" [checked]="calcInDb|async">From
+                                database
+                            </mat-checkbox>
+                            <span style="margin-left: 50px">Duration: {{calcDuration|async}} secs</span>
+                        </form>
+                    </div>
+                    <form class="card-content" [formGroup]="plotsSettingsForm">
+                        <mat-checkbox formControlName="showPolarized">Show polarized</mat-checkbox>
+                        <mat-checkbox formControlName="showTrans">Show transmission</mat-checkbox>
+                        <mat-checkbox formControlName="showDiffAngles">Show diffraction angles</mat-checkbox>
+                    </form>
+                </mat-card>
+                <app-plots [graphs]="graphs" [plotSettings]="plotSettings"></app-plots>
+            </div>
+
+
+        </div>
+    </mat-tab>
+</mat-tab-group>
+

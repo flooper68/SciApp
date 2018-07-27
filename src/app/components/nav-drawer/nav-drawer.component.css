@@ -1,0 +1,20 @@
+.host {
+    width: 0px;
+}
+
+.header {
+    background-color: rgba(0, 0, 0, 0.91);
+    height: 166px;
+}
+
+img {
+    width: 240px;
+    position: absolute;
+    top: 27px;
+    opacity: 0.85;
+    height: 130px;
+}
+
+.active {
+    background-color: rgba(177, 177, 177, 0.64);
+}

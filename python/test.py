@@ -1,3 +1,4 @@
+
 from python.funkce import *
 from python.zobrazovaci_funkce import *
 
@@ -49,5 +50,34 @@ options = {
 
 values, angles = general_func(structure_defining_func(structure), options_defining_func(options))
 
+# %%
+toSend = Message()
+import uuid
+
+print('here')
 options = options_defining_func(options)(None)
-show_specular_diffraction_ref(values, options)
+print('here')
+show_specular_diffraction_ref(values, options, toSend=toSend)
+print('here')
+show_specular_diffraction_trans(values, options, toSend=toSend)
+print('here')
+show_total(values, options, toSend=toSend)
+print('here')
+show_diff_angles(angles, options, toSend=toSend)
+print('here')
+show_first_negative_orders_trans_pol(values, options, toSend=toSend)
+print('here')
+show_first_negative_orders_ref_pol(values, options, toSend=toSend)
+print('here')
+show_first_negative_orders_ref_unpol(values, options, toSend=toSend)
+print('here')
+show_first_negative_orders_trans_unpol(values, options, toSend=toSend)
+
+toSend.data = {}
+toSend.name = 'Calc' + str(toSend.timestamp)
+toSend._id = str(uuid.uuid4())
+
+toSend.send()
+
+# %%
+print(str(uuid.uuid4()))

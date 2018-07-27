@@ -11,8 +11,10 @@ function createWindow() {
         width: 1200
     });
 
+    BrowserWindow.addDevToolsExtension('/Users/premyslciompa/Library/Application\ Support/Google/Chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.15.3_0');
+
     // and load the index.html of the app.
-    mainWindow.loadFile(path.join(__dirname, "view/index.html"));
+    mainWindow.loadFile(path.join(__dirname, '/view/index.html'));
 
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
