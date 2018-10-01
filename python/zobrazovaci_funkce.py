@@ -1,10 +1,9 @@
-import matplotlib
+#matplotlib.use('TkAgg')
+import json
 
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import mpld3
 import numpy as np
-import json
 
 
 class Message:
@@ -34,11 +33,12 @@ def show_specular_diffraction_ref(values, options, toSend={}, show=True):
     values = np.real(values)
     specular_ref = np.real((values[:, 0, 0] + values[:, 1, 0]) / 2)
 
-    diffraction_ref = np.real((values[:, 0].sum(axis=1) + values[:, 1].sum(axis=1) - values[:, 0, 0] - values[:, 1, 0]) / 4)
+    diffraction_ref = np.real(
+        (values[:, 0].sum(axis=1) + values[:, 1].sum(axis=1) - values[:, 0, 0] - values[:, 1, 0]) / 4)
 
     points = np.linspace(options['divisions_start'], options['divisions_end'], options['divisions'])
 
-    fig1 = plt.figure(1, figsize=(4.5, 3.7))
+    fig1 = plt.figure(1, figsize=(6.75, 5.55))
     plt.title("Total diffraction efficiency R")
     plt.plot(points, specular_ref, 'r-', label='Specular')
     plt.plot(points, diffraction_ref, 'b-', label='Diffraction')
@@ -57,11 +57,12 @@ def show_specular_diffraction_trans(values, options, toSend={}, show=True):
     values = np.real(values)
     specular_trans = np.real((values[:, 2, 0] + values[:, 3, 0]) / 2)
 
-    diffraction_trans = np.real((values[:, 2].sum(axis=1) + values[:, 3].sum(axis=1) - values[:, 2, 0] - values[:, 3, 0]) / 4)
+    diffraction_trans = np.real(
+        (values[:, 2].sum(axis=1) + values[:, 3].sum(axis=1) - values[:, 2, 0] - values[:, 3, 0]) / 4)
 
     points = np.linspace(options['divisions_start'], options['divisions_end'], options['divisions'])
 
-    fig2 = plt.figure(2, figsize=(4.5, 3.7))
+    fig2 = plt.figure(2, figsize=(6.75, 5.55))
     plt.title("Total diffraction efficiency T")
     plt.plot(points, specular_trans, 'r-', label='Specular')
     plt.plot(points, diffraction_trans, 'b-', label='Diffraction')
@@ -83,7 +84,7 @@ def show_total(values, options, toSend={}, show=True):
 
     points = np.linspace(options['divisions_start'], options['divisions_end'], options['divisions'])
 
-    fig3 = plt.figure(3, figsize=(4.5, 3.7))
+    fig3 = plt.figure(3, figsize=(6.75, 5.55))
     plt.title("Total transmission and reflection")
     plt.plot(points, total_trans, 'r-', label='Total transmission')
     plt.plot(points, total_ref, 'b-', label='Total reflection ')
@@ -96,7 +97,7 @@ def show_total(values, options, toSend={}, show=True):
     if show:
         plt.show()
 
-    fig4 = plt.figure(4, figsize=(4.5, 3.7))
+    fig4 = plt.figure(4, figsize=(6.75, 5.55))
     plt.title("Total transmission and reflection and absorbance")
     plt.plot(points, total_ref + total_trans, 'g-', label='Total transmission + reflection')
     plt.plot(points, 1 - total_ref - total_trans, 'y-', label='Absorbance')
@@ -116,7 +117,7 @@ def show_first_negative_orders_trans_pol(values, options, toSend={}, show=True):
     values = np.real(values)
     points = np.linspace(options['divisions_start'], options['divisions_end'], options['divisions'])
 
-    fig5 = plt.figure(5, figsize=(4.5, 3.7))
+    fig5 = plt.figure(5, figsize=(6.75, 5.55))
     plt.title("Diffraction efficiency Ts, Tp")
     plt.plot(points, values[:, 2, 2], 'r-', label='Ts')
     plt.plot(points, values[:, 3, 2], 'b-', label='Tp')
@@ -136,7 +137,7 @@ def show_first_negative_orders_trans_unpol(values, options, toSend={}, show=True
     values = np.real(values)
     points = np.linspace(options['divisions_start'], options['divisions_end'], options['divisions'])
 
-    fig6 = plt.figure(6, figsize=(4.5, 3.7))
+    fig6 = plt.figure(6, figsize=(6.75, 5.55))
     plt.title("Diffraction efficiency T")
     plt.plot(points, (values[:, 2, 2] + values[:, 3, 2]) / 2, 'r-', label='T')
     plt.xlabel(options['dependence']['label'])
@@ -156,7 +157,7 @@ def show_first_negative_orders_ref_unpol(values, options, toSend={}, show=True):
     values = np.real(values)
     points = np.linspace(options['divisions_start'], options['divisions_end'], options['divisions'])
 
-    fig7 = plt.figure(7, figsize=(4.5, 3.7))
+    fig7 = plt.figure(7, figsize=(6.75, 5.55))
     plt.title("Diffraction efficiency R")
     plt.plot(points, (values[:, 0, 2] + values[:, 1, 2]) / 2, 'r-', label='R')
     plt.xlabel(options['dependence']['label'])
@@ -176,7 +177,7 @@ def show_first_negative_orders_ref_pol(values, options, toSend={}, show=True):
     values = np.real(values)
     points = np.linspace(options['divisions_start'], options['divisions_end'], options['divisions'])
 
-    fig8 = plt.figure(8, figsize=(4.5, 3.7))
+    fig8 = plt.figure(8, figsize=(6.75, 5.55))
     plt.title("Diffraction efficiency Rs, Rp")
     plt.plot(points, values[:, 0, 2], 'r-', label='Rs')
     plt.plot(points, values[:, 1, 2], 'b-', label='Rp')
@@ -197,7 +198,7 @@ def show_diff_angles(values, options, toSend={}, show=True):
     points = np.linspace(options['divisions_start'], options['divisions_end'], options['divisions'])
 
     values = np.real(values)
-    fig9 = plt.figure(9, figsize=(4.5, 3.7))
+    fig9 = plt.figure(9, figsize=(6.75, 5.55))
     plt.title("Diffraction angles")
     plt.plot(points, values[:, 4], label='-2 order')
     plt.plot(points, values[:, 2], label='-1 order')
@@ -219,7 +220,7 @@ def show_comprehensive(values, options, toSend={}, show=True):
     values = np.real(values)
     points = np.linspace(options['divisions_start'], options['divisions_end'], options['divisions'])
 
-    fig1 = plt.figure(10, figsize=(4.5, 3.7))
+    fig1 = plt.figure(10, figsize=(6.75, 5.55))
     plt.title("Zero orders - Reflection")
     plt.plot(points, values[:, 0, 0], 'r-', label='Rs')
     plt.plot(points, values[:, 1, 0], 'b-', label='Rp')
@@ -232,7 +233,7 @@ def show_comprehensive(values, options, toSend={}, show=True):
     if show:
         plt.show()
 
-    fig2 = plt.figure(11, figsize=(4.5, 3.7))
+    fig2 = plt.figure(11, figsize=(6.75, 5.55))
     plt.title("Negative orders - Reflection")
     plt.plot(points, values[:, 0, 2], 'r-', label='Rs -1')
     plt.plot(points, values[:, 0, 4], 'r--', label='Rs -2')
@@ -241,7 +242,8 @@ def show_comprehensive(values, options, toSend={}, show=True):
     plt.plot(points, values[:, 1, 4], 'b--', label='Rp -2')
     plt.plot(points, values[:, 1, 6], 'b-.', label='Rp -3')
     plt.xlabel(options['dependence']['label'])
-    max = np.array([values[:, 0, 2], values[:, 0, 4], values[:, 0, 6], values[:, 1, 2], values[:, 1, 4], values[:, 1, 6]]).max()
+    max = np.array(
+        [values[:, 0, 2], values[:, 0, 4], values[:, 0, 6], values[:, 1, 2], values[:, 1, 4], values[:, 1, 6]]).max()
     plt.axis([options['divisions_start'], options['divisions_end'], 0, 1.4 * max])
     plt.legend(loc='upper right')
     plt.grid(True)
@@ -249,7 +251,7 @@ def show_comprehensive(values, options, toSend={}, show=True):
     if show:
         plt.show()
 
-    fig3 = plt.figure(12, figsize=(4.5, 3.7))
+    fig3 = plt.figure(12, figsize=(6.75, 5.55))
     plt.title("Positive orders - Reflection")
     plt.plot(points, values[:, 0, 1], 'r-', label='Rs 1')
     plt.plot(points, values[:, 0, 3], 'r--', label='Rs 2')
@@ -258,7 +260,8 @@ def show_comprehensive(values, options, toSend={}, show=True):
     plt.plot(points, values[:, 1, 3], 'b--', label='Rp 2')
     plt.plot(points, values[:, 1, 5], 'b-.', label='Rp 3')
     plt.xlabel(options['dependence']['label'])
-    max = np.array([values[:, 0, 1], values[:, 0, 3], values[:, 0, 5], values[:, 1, 1], values[:, 1, 3], values[:, 1, 5]]).max()
+    max = np.array(
+        [values[:, 0, 1], values[:, 0, 3], values[:, 0, 5], values[:, 1, 1], values[:, 1, 3], values[:, 1, 5]]).max()
     plt.axis([options['divisions_start'], options['divisions_end'], 0, 1.4 * max])
     plt.legend(loc='upper right')
     plt.grid(True)
@@ -269,3 +272,61 @@ def show_comprehensive(values, options, toSend={}, show=True):
     toSend.graphs['comp_zero'] = mpld3.fig_to_dict(fig1)
     toSend.graphs['comp_neg'] = mpld3.fig_to_dict(fig2)
     toSend.graphs['comp_pos'] = mpld3.fig_to_dict(fig3)
+
+def show_specular_ref_pol(values, options, toSend={}, show=True):
+    values = np.real(values)
+    points = np.linspace(options['divisions_start'], options['divisions_end'], options['divisions'])
+
+    fig1 = plt.figure(13, figsize=(6.75, 5.55))
+    plt.title("Specular reflection")
+    plt.plot(points, values[:, 0, 0], 'r-', label='Rs')
+    plt.plot(points, values[:, 1, 0], 'b-', label='Rp')
+    plt.xlabel(options['dependence']['label'])
+    max = np.array([values[:, 0, 0], values[:, 1, 0]]).max()
+    plt.axis([options['divisions_start'], options['divisions_end'], 0, 1.4 * max])
+    plt.legend(loc='upper right')
+    plt.grid(True)
+    plt.tight_layout()
+    if show:
+        plt.show()
+
+    fig2 = plt.figure(14, figsize=(6.75, 5.55))
+    plt.title("Specular reflection")
+    plt.plot(points, values[:, 2, 0], 'r-', label='Ts')
+    plt.plot(points, values[:, 3, 0], 'b-', label='Tp')
+    plt.xlabel(options['dependence']['label'])
+    max = np.array([values[:, 2, 0], values[:, 3, 0]]).max()
+    plt.axis([options['divisions_start'], options['divisions_end'], 0, 1.4 * max])
+    plt.legend(loc='upper right')
+    plt.grid(True)
+    plt.tight_layout()
+    if show:
+        plt.show()
+
+def show_measurement_gratings(values, options):
+    values = np.real(values)
+    points = np.linspace(options['divisions_start'], options['divisions_end'], options['divisions'])
+
+    fig1 = plt.figure(13, figsize=(6.75, 5.55))
+    plt.title("Specular reflection")
+    plt.plot(points, values[:, 0, 0], 'r-', label='Rs')
+    plt.plot(points, values[:, 1, 0], 'b-', label='Rp')
+    plt.xlabel(options['dependence']['label'])
+    max = np.array([values[:, 0, 0], values[:, 1, 0]]).max()
+    plt.axis([options['divisions_start'], options['divisions_end'], 0, 1.4 * max])
+    plt.legend(loc='upper right')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+    fig2 = plt.figure(14, figsize=(6.75, 5.55))
+    plt.title("Specular reflection")
+    plt.plot(points, values[:, 2, 0], 'r-', label='Ts')
+    plt.plot(points, values[:, 3, 0], 'b-', label='Tp')
+    plt.xlabel(options['dependence']['label'])
+    max = np.array([values[:, 2, 0], values[:, 3, 0]]).max()
+    plt.axis([options['divisions_start'], options['divisions_end'], 0, 1.4 * max])
+    plt.legend(loc='upper right')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()

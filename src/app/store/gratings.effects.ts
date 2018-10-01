@@ -80,7 +80,8 @@ export class GratingsEffects {
 
     @Effect({dispatch: false})
     saveToDb = this.actions$.ofType(SAVE_TO_DB_GRATING_PROJECT).pipe(
-        switchMap(() => this.store$.select('gratings')),
+        withLatestFrom(this.store$.select('gratings')),
+        map(([action, state]) => state),
         filter(state => !!state.viewModel.activeCalculationId),
         map((state) => {
             const obj = {...state.calculations.find(val => val._id === state.viewModel.activeCalculationId)};

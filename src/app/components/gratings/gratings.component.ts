@@ -54,6 +54,7 @@ export class GratingsComponent implements OnInit, OnDestroy {
 
     graphs: ShownGraphs;
     plotSettings: any;
+    plotsShown = false;
 
     constructor(public store: Store<AppState>, private change: ChangeDetectorRef, private electron: ElectronService) {
         this.gratingsForm = new FormGroup({
@@ -72,6 +73,7 @@ export class GratingsComponent implements OnInit, OnDestroy {
             from: new FormControl(),
             to: new FormControl(),
             divisions: new FormControl(),
+            substrateWidth: new FormControl(),
         });
         this.plotsSettingsForm = new FormGroup({
             showPolarized: new FormControl(),

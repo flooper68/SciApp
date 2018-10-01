@@ -3,9 +3,10 @@ import {ipcRenderer, remote, webFrame} from 'electron';
 import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import {Observable} from 'rxjs/internal/Observable';
-import * as Nedb from 'nedb';
 import {Observer} from 'rxjs/internal/types';
 import {CalculationVM} from '../models/calculation.model';
+import * as Os from 'os';
+import {Collection} from 'mongodb';
 
 
 @Injectable()
@@ -16,7 +17,8 @@ export class ElectronService {
     remote: typeof remote;
     childProcess: typeof childProcess;
     fs: typeof fs;
-    gratingsDb: Nedb;
+    gratingsDb: Collection ;
+    os: typeof Os;
 
     constructor() {
         // Conditional imports
@@ -27,8 +29,16 @@ export class ElectronService {
 
         this.childProcess = window.require('child_process');
         this.fs = window.require('fs');
+        this.os = window.require('os');
         const Datastore = window.require('nedb');
-        this.gratingsDb = new Datastore({filename: 'dist/db/gratings.db', autoload: true});
+        const dbPath = __dirname.replace('/view', '') + '/db/gratings.db';
+        this.gratingsDb = new Datastore({filename: dbPath, autoload: true});
+
+        const dbPathTingo = __dirname.replace('/view', '') + '/db';
+        const Db = window.require('tingodb')().Db;
+        const db = new Db(dbPathTingo, {});
+
+        this.gratingsDb = db.collection('gratings');
 
     }
 
@@ -65,17 +75,22 @@ export class ElectronService {
     }
 
     saveProjectToDb(data) {
-        this.gratingsDb.remove({_id: data._id});
-        this.gratingsDb.insert(data, function (err, newDoc) {   // Callback is optional
+        this.gratingsDb.remove({_id: data._id}, () => {
+            this.gratingsDb.insert(data, function (err, newDoc) {   // Callback is optional
             // newDoc is the newly inserted document, including its _id
             // newDoc has no key called notToBeSaved since its value was undefined
+            console.log('Calc saved', newDoc);
+        });
         });
     }
 
     loadAllProjects() {
         return Observable.create((observer: Observer<any>) => {
-            this.gratingsDb.find({}, function (err, docs) {
-                observer.next(docs);
+            this.gratingsDb.find({}).toArray( function (err, docs) {
+                const sorted = docs.sort((a,b) => {
+                    return parseFloat(b.timestamp) - parseFloat(a.timestamp)
+                });
+                observer.next(sorted);
                 observer.complete();
             });
         });
@@ -83,6 +98,8 @@ export class ElectronService {
     }
 
     deleteProjectFromDb(id: string) {
-        this.gratingsDb.remove({_id: id});
+        this.gratingsDb.remove({_id: id},() => {
+            console.log('calc deleted', id)
+        });
     }
 }

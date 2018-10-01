@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit, ViewChild} from '@angular/core';
 import {ShownGraphs} from '../../../models/shownGraphs.model';
 
 @Component({
@@ -11,11 +11,17 @@ export class PlotsComponent implements OnInit, OnChanges {
     @Input() graphs: ShownGraphs;
     @Input() plotSettings: any;
 
+    @ViewChild('plots') plots;
+
 
     constructor() {
     }
 
     ngOnInit() {
+        setTimeout(() => {
+
+            this.showingPlots(this.graphs, this.plotSettings);
+        }, 1);
     }
 
     ngOnChanges() {
@@ -48,6 +54,8 @@ export class PlotsComponent implements OnInit, OnChanges {
                 if (plotSettings.showDiffAngles) {
                     window.mpld3.draw_figure('plots', data.diff_angles);
                 }
+                // window.mpld3.draw_figure('plots', data.total_trans_ref);
+                // window.mpld3.draw_figure('plots', data.total_abs);
             }
         }
 

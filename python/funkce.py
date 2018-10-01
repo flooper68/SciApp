@@ -1,17 +1,15 @@
 import copy
 
 import numpy as np
-import scipy
-import scipy as sp
 from scipy.integrate import quad
 
 
 def complex_quadrature(func, a, b, lim, **kwargs):
     def real_func(x):
-        return scipy.real(func(x))
+        return np.real(func(x))
 
     def imag_func(x):
-        return scipy.imag(func(x))
+        return np.imag(func(x))
 
     real_integral = quad(real_func, a, b, **kwargs, limit=lim)
     imag_integral = quad(imag_func, a, b, **kwargs, limit=lim)
@@ -394,32 +392,6 @@ def join_s_matrices(S_0, s_1):
     return T_uu, R_ud, R_du, T_dd
 
 
-def plot_fourier_series(coef_integral, period, n_terms):
-    t = sp.symbols('t')
-    points = np.array(np.linspace(0, 10, 100))
-
-    def fourier_fc(coef_integral, period, n_terms):
-        omega = 2 * np.pi / period
-
-        def get_komplex_term_numeric(x):
-            komplex_coef = coef_integral(x)
-            temp = komplex_coef * sp.exp(1j * omega * x * t)
-            return temp
-
-        def get_fourier_koefs(k):
-            array = np.linspace(-n_terms, n_terms, 2 * n_terms + 1)
-            return np.vectorize(get_komplex_term_numeric)(array)
-
-        fn = np.sum(get_fourier_koefs(n_terms))
-        return fn
-
-    fn = fourier_fc(coef_integral, period, n_terms)
-
-    values_fc_numeric = np.vectorize(sp.lambdify(t, fn, 'numpy'))(points)
-
-    return
-
-
 def diff_eff_coef(order, i_angle, n_0, wv, per):
     angle = np.deg2rad(i_angle)
     Ny_0 = n_0 * np.sin(angle)
@@ -746,19 +718,18 @@ def calculate_toeplitz_matrices(structure, options):
 
     perm = [structure['superstrate'] ** 2, 0, 0, 0, structure['superstrate'] ** 2, 0, 0, 0,
             structure['superstrate'] ** 2]
-    layer_toeplitz_matrices.append(get_Q_matrix_non_periodic(perm, structure['period'], options['n_terms']))
+    layer_toeplitz_matrices.append(get_Q_matrix_anal(perm,1, structure['period'], options['n_terms'], 1))
 
     for x in structure['data']:
         if not x.get('periodic'):
-            layer_toeplitz_matrices.append(
-                get_Q_matrix_non_periodic(x['permittivity'], structure['period'], options['n_terms']))
+            layer_toeplitz_matrices.append(get_Q_matrix_anal(x['permittivity'],1, structure['period'], options['n_terms'], 1))
         elif x['periodic']:
             layer_toeplitz_matrices.append(
-                get_Q_matrix_periodic(x['materials'], structure['period'], options['n_terms']))
+                get_Q_matrix_anal(x['materials'][0]['permittivity'], x['materials'][1]['permittivity'][0], structure['period'], options['n_terms'],x['materials'][0]['stop']))
 
     perm = np.array(
         [structure['substrate'] ** 2, 0, 0, 0, structure['substrate'] ** 2, 0, 0, 0, structure['substrate'] ** 2])
-    layer_toeplitz_matrices.append(get_Q_matrix_non_periodic(perm, structure['period'], options['n_terms']))
+    layer_toeplitz_matrices.append(get_Q_matrix_anal(perm,1, structure['period'], options['n_terms'],1))
 
     return layer_toeplitz_matrices
 
@@ -1016,12 +987,17 @@ def get_observables(coh_matrices, options, structure):
 #             {'permittivity': [perm_ref, 0, 0, 0, perm_ref, 0, 0, 0, perm_ref], 'start': param, 'stop': 1},
 #         ]}
 #     ]}
+
+from concurrent.futures import ThreadPoolExecutor
+pool = ThreadPoolExecutor()
+
 def general_func(structure_defining_func=None, options_defining_func=None):
     options = options_defining_func(0)
     structure = structure_defining_func(0)
 
     def options_func(dep_options):
-        print('timer: tick', flush=True)
+        if 'tick' in options.keys():
+            print('timer: tick', flush=True)
         for item in coherent_subsystems:
             # Ke kazde podstrukture pridam jeji vypocitanou s-matici
             item['s_matrix'] = calculate_s_matrix(item, dep_options, item['toeplitz_matrix'])
@@ -1035,7 +1011,8 @@ def general_func(structure_defining_func=None, options_defining_func=None):
 
     def structure_func(structure):
         coherent_subsystems = get_coherent_subsets(structure)
-        print('timer: tick', flush=True)
+        if 'tick' in options.keys():
+            print('timer: tick', flush=True)
         for item in coherent_subsystems:
             # Kdyz neni toeplizova matice predvypocitana, tak ji vypocitam tady
             if not item.get('toeplitz_matrix'):
@@ -1148,3 +1125,52 @@ def structure_defining_func(structure):
 #         'label': 'Angle [deg]'
 #     }
 # }
+
+
+#@jit
+def jit_get_C_matrix_anal(period, n_terms, fill_factor, e_0, e_1):
+    arr = np.zeros((2 * n_terms + 1, 2 * n_terms + 1), dtype=np.complex128)
+
+    for i in range(arr.shape[0]):
+        for j in range(arr.shape[1]):
+            arr[i, j] = toeplitz_term_anal(fill_factor, period, i - j, e_0, e_1)
+    return arr
+
+
+#@njit(["complex128(float64,float64,int32,complex128,complex128)"])
+def toeplitz_term_anal(fill_factor, period, order, e_0, e_1):
+    if e_0 == 0:
+        return 0
+    if order == 0:
+        return fill_factor * (e_0 - e_1) + e_1
+    else:
+        return fill_factor * (e_0 - e_1) * np.sinc(fill_factor * order)
+
+
+#@jit
+def get_Q_matrix_anal(perm, perm2, period, n_terms, fill_factor):
+    e_11 = perm[0]
+    e_12 = perm[1]
+    e_13 = perm[2]
+    e_21 = perm[3]
+    e_22 = perm[4]
+    e_23 = perm[5]
+    e_31 = perm[6]
+    e_32 = perm[7]
+    e_33 = perm[8]
+
+    q_22 = np.linalg.inv(jit_get_C_matrix_anal(period, n_terms, fill_factor, 1 / e_22, 1/perm2))
+    q_12 = jit_get_C_matrix_anal(period, n_terms, fill_factor, e_12 / e_22, 0) * q_22
+    q_21 = q_22 * jit_get_C_matrix_anal(period, n_terms, fill_factor, e_21 / e_22, 0)
+    q_23 = q_22 * jit_get_C_matrix_anal(period, n_terms, fill_factor, e_23 / e_22, 0)
+    q_32 = jit_get_C_matrix_anal(period, n_terms, fill_factor, e_32 / e_22, 0) * q_22
+    q_11 = jit_get_C_matrix_anal(period, n_terms, fill_factor, (e_11 - e_12 * e_21 / e_22),
+                                 perm2) + q_12 * jit_get_C_matrix_anal(period, n_terms, fill_factor, e_21 / e_22, 0)
+    q_33 = jit_get_C_matrix_anal(period, n_terms, fill_factor, (e_11 - e_12 * e_21 / e_22),
+                                 perm2) + q_32 * jit_get_C_matrix_anal(period, n_terms, fill_factor, e_23 / e_22, 0)
+    q_13 = jit_get_C_matrix_anal(period, n_terms, fill_factor, (e_13 - e_21 * e_23 / e_22),
+                                 0) + q_12 * jit_get_C_matrix_anal(period, n_terms, fill_factor, e_23 / e_22, 0)
+    q_31 = jit_get_C_matrix_anal(period, n_terms, fill_factor, (e_31 - e_32 * e_21 / e_22),
+                                 0) + q_32 * jit_get_C_matrix_anal(period, n_terms, fill_factor, e_21 / e_22, 0)
+    return np.matrix(q_11), np.matrix(q_12), np.matrix(q_13), np.matrix(q_21), np.matrix(q_22), np.matrix(
+        q_23), np.matrix(q_31), np.matrix(q_32), np.matrix(q_33)

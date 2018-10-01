@@ -2,6 +2,9 @@
 
 block_cipher = None
 
+import PyInstaller.config
+PyInstaller.config.CONF['distpath'] = "../dist"
+
 
 a = Analysis(['main.py'],
              pathex=['/Users/premyslciompa/Documents/Projekty/SciApp/python'],

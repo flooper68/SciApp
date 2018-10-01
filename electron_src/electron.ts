@@ -11,13 +11,13 @@ function createWindow() {
         width: 1200
     });
 
-    BrowserWindow.addDevToolsExtension('/Users/premyslciompa/Library/Application\ Support/Google/Chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.15.3_0');
+    // BrowserWindow.addDevToolsExtension('/Users/premyslciompa/Library/Application\ Support/Google/Chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.15.3_0');
 
     // and load the index.html of the app.
     mainWindow.loadFile(path.join(__dirname, '/view/index.html'));
 
     // Open the DevTools.
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
 
     // Emitted when the window is closed.
     mainWindow.on("closed", () => {

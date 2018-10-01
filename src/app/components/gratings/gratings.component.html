@@ -1,4 +1,4 @@
-<mat-tab-group #matTab>
+<mat-tab-group #matTab (selectedIndexChange)="plotsShown = !plotsShown">
     <mat-tab label="Settings">
         <form [formGroup]="gratingsForm">
             <div class="content">
@@ -63,6 +63,11 @@
                                 <input formControlName="gratingFill" matInput placeholder="Fill factor" value="0.5">
                             </mat-form-field>
                         </div>
+                        <div>
+                            <mat-form-field>
+                                <input formControlName="substrateWidth" matInput placeholder="Substrate width" value="">
+                            </mat-form-field>
+                        </div>
 
                     </mat-card-content>
 
@@ -70,7 +75,7 @@
                 </mat-card>
 
 
-                <img src="./../../src/assets/images/grating.png">
+                <img src="./assets/images/grating.png">
                 <mat-card>
                     <mat-card-title>Calculation options</mat-card-title>
                     <mat-divider></mat-divider>
@@ -127,7 +132,6 @@
 
             </div>
         </form>
-        <mat-progress-bar color="warn" mode="determinate" [value]="progress | async"></mat-progress-bar>
 
     </mat-tab>
     <mat-tab label="Plots" #tabPlots>
@@ -169,11 +173,15 @@
                         <mat-checkbox formControlName="showDiffAngles">Show diffraction angles</mat-checkbox>
                     </form>
                 </mat-card>
-                <app-plots [graphs]="graphs" [plotSettings]="plotSettings"></app-plots>
+                <app-plots *ngIf="plotsShown" [graphs]="graphs" [plotSettings]="plotSettings"></app-plots>
             </div>
 
 
         </div>
     </mat-tab>
 </mat-tab-group>
+
+<mat-card class="progress-card" *ngIf="(progress | async) != 0">
+    <mat-progress-bar color="warn" mode="determinate" [value]="progress | async"></mat-progress-bar>
+</mat-card>
 

@@ -41,6 +41,7 @@ export interface GratingsState {
             from: string,
             to: string,
             divisions: string,
+            substrateWidth: string,
         },
         projectForm: {
             name: string,
@@ -74,6 +75,7 @@ const initialState: GratingsState = {
             from: '400',
             to: '800',
             divisions: '200',
+            substrateWidth: '4000',
         },
         projectForm: {
             name: '',
@@ -89,13 +91,15 @@ export function gratingsReducer(state = initialState, action: GratingsAction) {
         case ADD_GRATING_DATA:
             return {
                 ...state,
-                calculations: [...state.calculations, action.payload]
+                calculations: [action.payload, ...state.calculations]
             };
 
 
         case SET_CALCULATION_ACTIVE: {
             const activeProject = state.calculations.find(item => item._id === action.payload);
-            return {
+            console.log(activeProject)
+
+            let obj = {
                 ...state,
                 viewModel: {
                     ...state.viewModel,
@@ -106,7 +110,7 @@ export function gratingsReducer(state = initialState, action: GratingsAction) {
                         cappingIncoherent: !activeProject.structure.data[0].coherent,
                         reflectiveIndex: activeProject.structure.data[1].materials[0].permittivity[0],
                         reflectiveThickness: activeProject.structure.data[1].width,
-                        gratingIndex: activeProject.structure.data[1].materials[1].permittivity[0],
+                        gratingIndex: activeProject.structure.data[2].materials[0].permittivity[0],
                         gratingThickness: parseFloat(activeProject.structure.data[2].width) + parseFloat(activeProject.structure.data[1].width) + '',
                         gratingPeriod: activeProject.structure.period,
                         gratingFill: activeProject.structure.data[1].materials[0].stop,
@@ -116,12 +120,18 @@ export function gratingsReducer(state = initialState, action: GratingsAction) {
                         from: activeProject.options.divisions_start,
                         to: activeProject.options.divisions_end,
                         divisions: activeProject.options.divisions,
+                        substrateWidth: activeProject.structure.data[4].width,
                     },
                     projectForm: {
                         name: activeProject.name,
                     }
                 }
             };
+
+            if(activeProject.options.dependence.name == 'ref_thick' || activeProject.options.dependence.name == 'grating_thick' ) {
+                obj.viewModel.settingsForm.gratingThickness = activeProject.structure.data[2].width + '';
+            }
+            return obj
         }
 
         case UPDATE_GRATINGS_PROGRESS:

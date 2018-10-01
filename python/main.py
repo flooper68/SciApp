@@ -92,20 +92,47 @@ def main():
 def ref_structure(structure):
     def fun(param):
         temp = copy.deepcopy(structure)
-        temp['data'][1]['width'] = param
-        temp['data'][2]['width'] = temp['data'][2]['width'] - param
-        temp['data'][3]['width'] = param
-        return temp
+        if temp['data'][2]['width'] > param:
+            temp['data'][1]['width'] = param
+            temp['data'][2]['width'] = temp['data'][2]['width'] - param
+            temp['data'][3]['width'] = param
+            return temp
+        else:
+            width_grating = temp['data'][2]['width']
+            perm_ref = temp['data'][1]['materials'][0]['permittivity'][0]
+            temp['data'][1]['width'] = width_grating
+            temp['data'][2]['width'] = param - width_grating
+            temp['data'][3]['width'] = width_grating
+            temp['data'][2]['materials'][0]['permittivity'][0] = perm_ref
+            temp['data'][2]['materials'][0]['permittivity'][4] = perm_ref
+            temp['data'][2]['materials'][0]['permittivity'][8] = perm_ref
+            temp['data'][2]['materials'][1]['permittivity'][0] = perm_ref
+            temp['data'][2]['materials'][1]['permittivity'][4] = perm_ref
+            temp['data'][2]['materials'][1]['permittivity'][8] = perm_ref
 
+            return temp
     return fun
 
 
 def grating_structure(structure):
-    def fun(param):
+    def fun(grating_width):
         temp = copy.deepcopy(structure)
-        temp['data'][2]['width'] = param - temp['data'][1]['width']
-        return temp
-
+        if grating_width > temp['data'][1]['width']:
+            temp['data'][2]['width'] = grating_width - temp['data'][1]['width']
+            return temp
+        else:
+            ref_width = temp['data'][1]['width']
+            perm_ref = temp['data'][1]['materials'][0]['permittivity'][0]
+            temp['data'][1]['width'] = grating_width
+            temp['data'][2]['width'] = ref_width - grating_width
+            temp['data'][2]['materials'][0]['permittivity'][0] = perm_ref
+            temp['data'][2]['materials'][0]['permittivity'][4] = perm_ref
+            temp['data'][2]['materials'][0]['permittivity'][8] = perm_ref
+            temp['data'][2]['materials'][1]['permittivity'][0] = perm_ref
+            temp['data'][2]['materials'][1]['permittivity'][4] = perm_ref
+            temp['data'][2]['materials'][1]['permittivity'][8] = perm_ref
+            temp['data'][3]['width'] = grating_width
+            return temp
     return fun
 
 # start process
